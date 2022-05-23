@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "protos/header.proto";
+
+enum StopResult (
+   OK = 1
+   FAIL = 2
+}
+
+message stopRequest {
+    header header = 1;
+    string serviceName;
+    google.protobuf.Timestamp time = 2;
+}
+
+service stopService {
+    rpc stop(stopRequest) returns (StopResult) {}
+}
