@@ -21,7 +21,8 @@ message newGeoPhotoTakenReply {
     string filename = 2;
     bytes data = 3; // binary data of photo
     float latitude = 16;
-    float altitude = 17; 
+    float longitude = 17;
+    float altitude = 18; 
 }
 
 service photoService {
