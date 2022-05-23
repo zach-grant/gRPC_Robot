@@ -11,15 +11,17 @@ message photoRequest {
 message photoReply {
     header header = 1;
 
-    string filename = 2;
-    bytes data = 3; // binary data of photo
+    bool fileExists = 2;
+    string filename = 3;
+    bytes data = 4; // binary data of photo
 }
 
 message newGeoPhotoTakenReply {
     header header = 1;
     
-    string filename = 2;
-    bytes data = 3; // binary data of photo
+    bool fileExists = 2;
+    string filename = 3;
+    bytes data = 4; // binary data of photo
     float latitude = 16;
     float longitude = 17;
     float altitude = 18; 
