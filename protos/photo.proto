@@ -18,9 +18,8 @@ message photoReply {
 
 message newGeoPhotoTakenReply {
     header header = 1;
-    float longitude = 2;
-    string filename = 3;
-    bytes data = 4; // binary data of photo
+    string filename = 2;
+    bytes data = 3; // binary data of photo
     float latitude = 16;
     float altitude = 17; 
 }
