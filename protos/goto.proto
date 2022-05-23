@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message GoToRequest {
+    int32 x_coord = 1;
+    int32 y_coord = 2;
+}
+
+message GoToResponse {
+    enum GoToResult {
+        SUCCESS = 0;
+        INVALID_COORDINATES = 1;
+        CANNOT_MOVE = 2;
+    }
+    GoToResult gotoResult = 1;
+}
+
+service GoTo_Controller {
+    rpc GoToCoordinates(GoToRequest) returns (GoToResponse) {}
+}
