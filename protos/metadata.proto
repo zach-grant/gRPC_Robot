@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/Empty.proto";
+
+message metadata {
+    string name = 1;
+    string firmwareVersion = 2;
+    string birthday = 3;
+    string serialID = 4;
+    string batteryType = 5;
+}
+
+service metaService {
+    rpc getMetadata (google.protobuf.Empty) returns (metadata) {}
+}

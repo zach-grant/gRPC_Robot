@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "protos/header.proto";
+
+message photoRequest {
+    header header = 1;
+
+    string filename = 2;
+}
+
+message photoReply {
+    header header = 1;
+
+    string filename = 2;
+    bytes data = 3; // binary data of photo
+}
+
+service photoService {
+    rpc getPhoto(photoRequest) returns (photoReply) {}
+}

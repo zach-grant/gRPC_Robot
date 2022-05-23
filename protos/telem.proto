@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "protos/header.proto";
+
+enum ArmState {
+    UP = 0;
+    DOWN = 1;
+    STOWED = 2;
+}
+
+message telem {
+    header header = 1;
+
+    float x = 2;
+    float y = 3;
+
+    ArmState leftArmState = 16;
+    ArmState rightArmState = 17;
+}
