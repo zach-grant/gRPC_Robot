@@ -16,21 +16,13 @@ message photoReply {
     bytes data = 3; // binary data of photo
 }
 
-message newPhotoTakenReply {
-    header header = 1;
-    Timestamp photoCreationTime = 2;
-    string filename = 3;
-    bytes data = 4; // binary data of photo
-}
-
 message newGeoPhotoTakenReply {
     header header = 1;
     float longitude = 2;
-    float latitude = 3;
-    float altitude = 4;
-    Timestamp photoCreationTime = 5;
-    string filename = 6;
-    bytes data = 7; // binary data of photo
+    string filename = 3;
+    bytes data = 4; // binary data of photo
+    float latitude = 16;
+    float altitude = 17; 
 }
 
 service photoService {
@@ -38,9 +30,5 @@ service photoService {
 }
 
 service takePhotoService {
-    rpc takePhoto(photoRequest) returns (newPhotoTakenReply) {}
-}
-
-service takeGeoPhotoService {
     rpc takePhoto(photoRequest) returns (newGeoPhotoTakenReply) {}
 }
