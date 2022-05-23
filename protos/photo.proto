@@ -11,10 +11,26 @@ message photoRequest {
 message photoReply {
     header header = 1;
 
-    string filename = 2;
-    bytes data = 3; // binary data of photo
+    bool fileExists = 2;
+    string filename = 16;
+    bytes data = 17; // binary data of photo
+}
+
+message newGeoPhotoTakenReply {
+    header header = 1;
+    
+    bool fileExists = 2;
+    string filename = 16;
+    bytes data = 17; // binary data of photo
+    float latitude = 18;
+    float longitude = 19;
+    float altitude = 20; 
 }
 
 service photoService {
     rpc getPhoto(photoRequest) returns (photoReply) {}
+}
+
+service takePhotoService {
+    rpc takePhoto(photoRequest) returns (newGeoPhotoTakenReply) {}
 }
