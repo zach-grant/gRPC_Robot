@@ -1,8 +1,11 @@
 syntax = "proto3";
 
+import "protos/header.proto";
+
 message GoToRequest {
-    int32 x_coord = 1;
-    int32 y_coord = 2;
+    header header = 1;
+    int32 x_coord = 2;
+    int32 y_coord = 3;
 }
 
 message GoToResponse {
@@ -11,7 +14,8 @@ message GoToResponse {
         INVALID_COORDINATES = 1;
         CANNOT_MOVE = 2;
     }
-    GoToResult gotoResult = 1;
+    header header = 1;
+    GoToResult gotoResult = 2;
 }
 
 service GoTo_Controller {
