@@ -25,7 +25,12 @@ message telem {
     ArmState rightArmState = 17;
 }
 
+message setModeResponse {
+    header header = 1;
+    bool modeSetSuccess = 2;
+}
+
 service telemService {
-    rpc setMode (RobotMode) returns (bool) {}
+    rpc setMode (RobotMode) returns (setModeResponse) {}
 }
 
