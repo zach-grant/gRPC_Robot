@@ -2,6 +2,11 @@ syntax = "proto3";
 
 import "protos/header.proto";
 
+enum RobotMode {
+    Manual = 0;
+    Guided = 1;
+}
+
 enum ArmState {
     UP = 0;
     DOWN = 1;
@@ -14,6 +19,13 @@ message telem {
     float x = 2;
     float y = 3;
 
+    RobotMode mode = 18;
+
     ArmState leftArmState = 16;
     ArmState rightArmState = 17;
 }
+
+service telemService {
+    rpc setMode (RobotMode) returns (bool) {}
+}
+
