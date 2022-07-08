@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "protos/header.proto";
-import "protos/telem.proto";
-import "google/protobuf/Empty.proto";
+import "header.proto";
+import "telem.proto";
+import "google/protobuf/empty.proto";
 
 message remoteControl {
     header header = 1;
