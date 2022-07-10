@@ -1,2 +1,4 @@
 protos_gen/
 venv/
+__pycache__/
+.idea/
