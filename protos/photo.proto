@@ -2,23 +2,20 @@ syntax = "proto3";
 
 import "header.proto";
 
-message photoRequest {
+message PhotoRequest {
     header header = 1;
-
     string filename = 2;
 }
 
-message photoReply {
+message PhotoReply {
     header header = 1;
-
     bool fileExists = 2;
     string filename = 16;
     bytes data = 17; // binary data of photo
 }
 
-message newGeoPhotoTakenReply {
+message NewGeoPhotoTakenReply {
     header header = 1;
-    
     bool fileExists = 2;
     string filename = 16;
     bytes data = 17; // binary data of photo
@@ -27,10 +24,10 @@ message newGeoPhotoTakenReply {
     float altitude = 20; 
 }
 
-service photoService {
-    rpc getPhoto(photoRequest) returns (photoReply) {}
+service PhotoService {
+    rpc GetPhoto(PhotoRequest) returns (PhotoReply) {}
 }
 
-service takePhotoService {
-    rpc takePhoto(photoRequest) returns (newGeoPhotoTakenReply) {}
+service TakePhotoService {
+    rpc TakePhoto(PhotoRequest) returns (NewGeoPhotoTakenReply) {}
 }

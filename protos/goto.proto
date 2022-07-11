@@ -18,6 +18,6 @@ message GoToResponse {
     GoToResult gotoResult = 2;
 }
 
-service GoTo_Controller {
+service GoToController {
     rpc GoToCoordinates(GoToRequest) returns (GoToResponse) {}
 }

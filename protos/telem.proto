@@ -13,9 +13,8 @@ enum ArmState {
     STOWED = 2;
 }
 
-message telem {
+message Telem {
     header header = 1;
-
     float x = 2;
     float y = 3;
 
@@ -25,17 +24,16 @@ message telem {
     ArmState rightArmState = 17;
 }
 
-message setModeRequest {
+message SetModeRequest {
     header header = 1;
     RobotMode mode = 2;
 }
 
-message setModeResponse {
+message SetModeResponse {
     header header = 1;
     bool modeSetSuccess = 2;
 }
 
-service telemService {
-    rpc setMode (setModeRequest) returns (setModeResponse) {}
+service TelemService {
+    rpc SetMode (SetModeRequest) returns (SetModeResponse) {}
 }
-

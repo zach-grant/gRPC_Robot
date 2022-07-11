@@ -4,15 +4,14 @@ import "header.proto";
 import "telem.proto";
 import "google/protobuf/empty.proto";
 
-message remoteControl {
+message RemoteControl {
     header header = 1;
-
     ArmState leftArmCommand = 2;
     ArmState rightArmCommand = 3;
     float xAxis = 4;
     float yAxis = 5;
 }
 
-service rcService {
-    rpc move(stream remoteControl) returns (google.protobuf.Empty) {}
+service RcService {
+    rpc Move(stream RemoteControl) returns (google.protobuf.Empty) {}
 }

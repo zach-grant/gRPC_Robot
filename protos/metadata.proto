@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-message metadata {
+message Metadata {
     string name = 1;
     string firmwareVersion = 2;
     string birthday = 3;
@@ -10,6 +10,6 @@ message metadata {
     string batteryType = 5;
 }
 
-service metaService {
-    rpc getMetadata (google.protobuf.Empty) returns (metadata) {}
+service MetaService {
+    rpc GetMetadata (google.protobuf.Empty) returns (Metadata) {}
 }
