@@ -3,16 +3,16 @@ syntax = "proto3";
 import "header.proto";
 
 enum RobotMode {
-    UNKNOWN_MODE = 0;
-    MANUAL = 1;
-    GUIDED = 2;
+    MODE_UNKNOWN = 0;
+    MODE_MANUAL = 1; // TODO: Remote Control actions should work only in manual mode
+    MODE_GUIDED = 2; // TODO: Goto actions should work only in guided mode
 }
 
 enum ArmState {
-    UNKNOWN_ARM_STATE = 0;
-    UP = 1;
-    DOWN = 2;
-    STOWED = 3;
+    ARM_UNKNOWN_STATE = 0;
+    ARM_UP = 1;
+    ARM_DOWN = 2;
+    ARM_STOWED = 3;
 }
 
 message Telem {

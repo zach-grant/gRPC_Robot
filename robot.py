@@ -22,6 +22,9 @@ class Robot:
         # used for the timestamp of the messages (part of the header)
         self.timestamp = Timestamp()
 
+        # set the initial mode of the robot
+        self.current_mode = pg.telem_pb2.MODE_UNKNOWN
+
         # define some identity for the robot
         robot = self.random.choice([('Arnie',  'T-800',  'GOOD'),
                                     ('Robert', 'T-1000', 'BAD'),
@@ -79,6 +82,18 @@ class Robot:
                                             )
         return metadata
 
+    def handle_set_mode(self, request):
+        logging.info(f'SetMode request received: header={request.header}, mode={request.mode}')
+        success = False
+        if request.mode != pg.telem_pb2.MODE_UNKNOWN:
+            self.current_mode = pg.telem_pb2.SetModeRequest.mode
+            success = True
+
+        response = pg.telem_pb2.SetModeResponse(header=self.create_header(), modeSetSuccess=success)
+        logging.info(f'SetMode response created: success={response.modeSetSuccess}')
+
+        return response
+
 
 class RobotServicer(Robot,
                     pg.estop_pb2_grpc.StopServiceServicer,
@@ -108,7 +123,7 @@ class RobotServicer(Robot,
         return google.protobuf.empty_pb2.Empty()
 
     def SetMode(self, request, context):
-        return pg.telem_pb2.SetModeResponse()
+        return self.handle_set_mode(request)
 
 
 if __name__ == '__main__':
