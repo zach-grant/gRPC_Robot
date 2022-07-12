@@ -13,7 +13,7 @@ enum GoToResult {
     GOTO_UNDEFINED = 0;
     GOTO_SUCCESS = 1;
     GOTO_INVALID_COORDINATES = 2;
-    GOTO_CANNOT_MOVE = 3;
+    GOTO_CANNOT_MOVE = 3; // will be returned if the robot is not in guided state
 }
 
 message GoToResponse {

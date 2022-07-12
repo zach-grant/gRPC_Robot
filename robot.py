@@ -13,6 +13,8 @@ import google
 
 class Robot:
     def __init__(self):
+        # TODO: the robot needs to have a position (x and y) in the 2D space where is lives
+
         # the robot needs its own instance of the random number generator
         self.random = random.Random()
 
@@ -30,19 +32,19 @@ class Robot:
                                     ('Robert', 'T-1000', 'BAD'),
                                     ])
         self.name = robot[0]
-        self.firmware_version = f'{robot[1]}#{self.random_string(6)}'
+        self.firmware_version = f'{robot[1]}#{self.__random_string(6)}'
         self.birthday = str(datetime.now())
-        self.serial_id = self.random_string(20)
+        self.serial_id = self.__random_string(20)
         self.batteryType = f'{self.random.randint(1,4)}-cell {robot[1]} battery'
 
         logging.info(f'A {robot[2]} robot created successfully! Name: {self.name}, Model: {robot[1]}')
 
-    def random_string(self, length):
+    def __random_string(self, length):
         # use only capital letters hence the range from 65 to 90
         result = [chr(self.random.randint(65, 90)) for _ in range(length)]
         return ''.join(result)
 
-    def create_header(self):
+    def __create_header(self):
         header = pg.header_pb2.Header(uid=str(self.current_message_id).rjust(20, '0'),
                                       time=self.timestamp.GetCurrentTime()
                                       )
@@ -57,19 +59,22 @@ class Robot:
         logging.info(f'EStop request received: header={request.header}')
         # fail the emergency stop randomly 1 out of 5 times
         stop_success = pg.estop_pb2.STOP_SUCCESS if self.fail_once_in_n_times(5) else pg.estop_pb2.STOP_FAIL
-        reply = pg.estop_pb2.StopReply(header=self.create_header(), success=stop_success)
+        reply = pg.estop_pb2.StopReply(header=self.__create_header(), success=stop_success)
         logging.info(f'EStop reply created: success={reply.success}')
         return reply
 
     def handle_goto(self, request):
         logging.info(f'GoTo request received: header={request.header}, x_coord={request.x_coord}, y_coord={request.y_coord}')
+
         go_to_result = pg.goto_pb2.GOTO_UNDEFINED
-        if (request.x_coord >= 0) and (request.y_coord >= 0):
-            # fail to move 1 out of 10 times
-            go_to_result = pg.goto_pb2.GOTO_SUCCESS if self.fail_once_in_n_times(10) else pg.goto_pb2.GOTO_CANNOT_MOVE
-        else:
+        if self.current_mode != pg.telem_pb2.MODE_GUIDED:
+                go_to_result = pg.goto_pb2.GOTO_CANNOT_MOVE
+        elif (request.x_coord < 0) or (request.y_coord < 0):
             go_to_result = pg.goto_pb2.GOTO_INVALID_COORDINATES
-        response = pg.goto_pb2.GoToResponse(header=self.create_header(), gotoResult=go_to_result)
+        else:
+            go_to_result = pg.goto_pb2.GOTO_SUCCESS
+
+        response = pg.goto_pb2.GoToResponse(header=self.__create_header(), gotoResult=go_to_result)
         logging.info(f'GoTo response created: result={response.gotoResult}')
         return response
 
@@ -86,10 +91,10 @@ class Robot:
         logging.info(f'SetMode request received: header={request.header}, mode={request.mode}')
         success = False
         if request.mode != pg.telem_pb2.MODE_UNKNOWN:
-            self.current_mode = pg.telem_pb2.SetModeRequest.mode
+            self.current_mode = request.mode
             success = True
 
-        response = pg.telem_pb2.SetModeResponse(header=self.create_header(), modeSetSuccess=success)
+        response = pg.telem_pb2.SetModeResponse(header=self.__create_header(), modeSetSuccess=success)
         logging.info(f'SetMode response created: success={response.modeSetSuccess}')
 
         return response
