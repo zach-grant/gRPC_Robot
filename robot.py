@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import random
+from google.protobuf.timestamp_pb2 import Timestamp
 import grpc
 from concurrent.futures import ThreadPoolExecutor
 
@@ -9,7 +11,38 @@ import protos_gen as pg
 import google
 
 
-class RobotServicer(pg.estop_pb2_grpc.StopServiceServicer,
+class Robot:
+    def __init__(self):
+        # the robot needs its own instance of the random number generator
+        self.random = random.Random()
+
+        # used to create the UIDs of the messages (part of the header)
+        self.current_message_id = self.random.randint(0, 1_000_000)
+
+        # used for the timestamp of the messages (part of the header)
+        self.timestamp = Timestamp()
+
+        logging.info('A robot created successfully!')
+
+    def create_header(self):
+        header = pg.header_pb2.Header(uid=str(self.current_message_id).rjust(20, '0'),
+                                      time=self.timestamp.GetCurrentTime()
+                                      )
+        logging.info(f'Header created: UID={header.uid}, TIME={header.time}')
+        self.current_message_id += 1 # use the next number as an UID for the next message
+        return header
+
+    def handle_estop(self, request):
+        # fail the emergency stop randomly 1 out of 5 times
+        logging.info(f'EStop request received: header={request.header}')
+        stop_success = pg.estop_pb2.FAIL if self.random.randint(0, 5) == 0 else pg.estop_pb2.SUCCESS
+        reply = pg.estop_pb2.StopReply(header=self.create_header(), success=stop_success)
+        logging.info(f'EStop reply created: success={reply.success}')
+        return reply
+
+
+class RobotServicer(Robot,
+                    pg.estop_pb2_grpc.StopServiceServicer,
                     pg.goto_pb2_grpc.GoToControllerServicer,
                     pg.metadata_pb2_grpc.MetaServiceServicer,
                     pg.photo_pb2_grpc.PhotoServiceServicer,
@@ -18,7 +51,7 @@ class RobotServicer(pg.estop_pb2_grpc.StopServiceServicer,
                     pg.telem_pb2_grpc.TelemServiceServicer,
                     ):
     def Stop(self, request, context):
-        return pg.estop_pb2.StopReply()
+        return self.handle_estop(request)
 
     def GoToCoordinates(self, request, context):
         return pg.goto_pb2.GoToResponse()
@@ -40,6 +73,8 @@ class RobotServicer(pg.estop_pb2_grpc.StopServiceServicer,
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
     logging.info(f'Using the following path for importing the proto/gRPC imports: {fix_paths}')
 
     server = grpc.server(ThreadPoolExecutor(max_workers=5))

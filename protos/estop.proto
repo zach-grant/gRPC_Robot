@@ -6,13 +6,13 @@ message StopRequest {
     Header header = 1;
 }
 
-message StopReply {
-    enum StopSuccess {
-        SUCCESS = 0;
-        FAIL = 1;
-    }
+enum StopSuccess {
+    SUCCESS = 0;
+    FAIL = 1;
+}
 
-Header header = 1;
+message StopReply {
+    Header header = 1;
     StopSuccess success = 2;
 }
 
