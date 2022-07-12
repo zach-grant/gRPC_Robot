@@ -38,7 +38,7 @@ class Robot:
     def handle_estop(self, request):
         logging.info(f'EStop request received: header={request.header}')
         # fail the emergency stop randomly 1 out of 5 times
-        stop_success = pg.estop_pb2.FAIL if self.fail_once_in_n_times(5) else pg.estop_pb2.SUCCESS
+        stop_success = pg.estop_pb2.STOP_SUCCESS if self.fail_once_in_n_times(5) else pg.estop_pb2.STOP_FAIL
         reply = pg.estop_pb2.StopReply(header=self.create_header(), success=stop_success)
         logging.info(f'EStop reply created: success={reply.success}')
         return reply

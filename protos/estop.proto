@@ -7,8 +7,9 @@ message StopRequest {
 }
 
 enum StopSuccess {
-    SUCCESS = 0;
-    FAIL = 1;
+    // why those ugly names: https://developers.google.com/protocol-buffers/docs/style#enums
+    STOP_SUCCESS = 0;
+    STOP_FAIL = 1;
 }
 
 message StopReply {
