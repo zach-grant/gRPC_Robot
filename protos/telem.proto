@@ -3,14 +3,16 @@ syntax = "proto3";
 import "header.proto";
 
 enum RobotMode {
-    Manual = 0;
-    Guided = 1;
+    UNKNOWN_MODE = 0;
+    MANUAL = 1;
+    GUIDED = 2;
 }
 
 enum ArmState {
-    UP = 0;
-    DOWN = 1;
-    STOWED = 2;
+    UNKNOWN_ARM_STATE = 0;
+    UP = 1;
+    DOWN = 2;
+    STOWED = 3;
 }
 
 message Telem {

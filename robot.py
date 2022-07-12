@@ -36,7 +36,7 @@ class RobotServicer(pg.estop_pb2_grpc.StopServiceServicer,
         return google.protobuf.empty_pb2.Empty()
 
     def SetMode(self, request, context):
-        return pg.telem_pb2.setModeResponse()
+        return pg.telem_pb2.SetModeResponse()
 
 
 if __name__ == '__main__':
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     pg.photo_pb2_grpc.add_PhotoServiceServicer_to_server(robot_servicer, server)
     pg.photo_pb2_grpc.add_TakePhotoServiceServicer_to_server(robot_servicer, server)
     pg.remoteControl_pb2_grpc.add_RcServiceServicer_to_server(robot_servicer, server)
+    pg.telem_pb2_grpc.add_TelemServiceServicer_to_server(robot_servicer, server)
 
     server.add_insecure_port('[::]:9000')
     server.start()
