@@ -5,7 +5,7 @@ import "telem.proto";
 import "google/protobuf/empty.proto";
 
 message RemoteControl {
-    header header = 1;
+    Header header = 1;
     ArmState leftArmCommand = 2;
     ArmState rightArmCommand = 3;
     float xAxis = 4;

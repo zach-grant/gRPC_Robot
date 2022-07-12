@@ -16,7 +16,7 @@ enum ArmState {
 }
 
 message Telem {
-    header header = 1;
+    Header header = 1;
     float x = 2;
     float y = 3;
 
@@ -27,12 +27,12 @@ message Telem {
 }
 
 message SetModeRequest {
-    header header = 1;
+    Header header = 1;
     RobotMode mode = 2;
 }
 
 message SetModeResponse {
-    header header = 1;
+    Header header = 1;
     bool modeSetSuccess = 2;
 }
 

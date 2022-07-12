@@ -3,7 +3,7 @@ syntax = "proto3";
 import "header.proto";
 
 message GoToRequest {
-    header header = 1;
+    Header header = 1;
     int32 x_coord = 2;
     int32 y_coord = 3;
 }
@@ -14,7 +14,7 @@ message GoToResponse {
         INVALID_COORDINATES = 1;
         CANNOT_MOVE = 2;
     }
-    header header = 1;
+    Header header = 1;
     GoToResult gotoResult = 2;
 }
 

@@ -3,17 +3,17 @@ syntax = "proto3";
 import "header.proto";
 
 message StopRequest {
-    header header = 1;
+    Header header = 1;
 }
 
 message StopReply {
-    enum stopSuccess {
+    enum StopSuccess {
         SUCCESS = 0;
         FAIL = 1;
     }
-    
-    header header = 1;
-    stopSuccess success = 2;       
+
+Header header = 1;
+    StopSuccess success = 2;
 }
 
 service StopService {
