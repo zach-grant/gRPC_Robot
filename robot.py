@@ -29,16 +29,31 @@ class Robot:
                                       time=self.timestamp.GetCurrentTime()
                                       )
         logging.info(f'Header created: UID={header.uid}, TIME={header.time}')
-        self.current_message_id += 1 # use the next number as an UID for the next message
+        self.current_message_id += 1  # use the next number as an UID for the next message
         return header
 
+    def fail_once_in_n_times(self, n):
+        return False if self.random.randint(0, n-1) == 0 else True
+
     def handle_estop(self, request):
-        # fail the emergency stop randomly 1 out of 5 times
         logging.info(f'EStop request received: header={request.header}')
-        stop_success = pg.estop_pb2.FAIL if self.random.randint(0, 5) == 0 else pg.estop_pb2.SUCCESS
+        # fail the emergency stop randomly 1 out of 5 times
+        stop_success = pg.estop_pb2.FAIL if self.fail_once_in_n_times(5) else pg.estop_pb2.SUCCESS
         reply = pg.estop_pb2.StopReply(header=self.create_header(), success=stop_success)
         logging.info(f'EStop reply created: success={reply.success}')
         return reply
+
+    def handle_goto(self, request):
+        logging.info(f'GoTo request received: header={request.header}, x_coord={request.x_coord}, y_coord={request.y_coord}')
+        go_to_result = pg.goto_pb2.GOTO_UNDEFINED
+        if (request.x_coord >= 0) and (request.y_coord >= 0):
+            # fail to move 1 out of 10 times
+            go_to_result = pg.goto_pb2.GOTO_SUCCESS if self.fail_once_in_n_times(10) else pg.goto_pb2.GOTO_CANNOT_MOVE
+        else:
+            go_to_result = pg.goto_pb2.GOTO_INVALID_COORDINATES
+        response = pg.goto_pb2.GoToResponse(header=self.create_header(), gotoResult=go_to_result)
+        logging.info(f'GoTo response created: result={response.gotoResult}')
+        return response
 
 
 class RobotServicer(Robot,
@@ -54,7 +69,7 @@ class RobotServicer(Robot,
         return self.handle_estop(request)
 
     def GoToCoordinates(self, request, context):
-        return pg.goto_pb2.GoToResponse()
+        return self.handle_goto(request)
 
     def GetMetadata(self, request, context):
         return pg.metadata_pb2.Metadata()

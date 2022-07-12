@@ -8,12 +8,15 @@ message GoToRequest {
     int32 y_coord = 3;
 }
 
+enum GoToResult {
+    // why those ugly names: https://developers.google.com/protocol-buffers/docs/style#enums
+    GOTO_UNDEFINED = 0;
+    GOTO_SUCCESS = 1;
+    GOTO_INVALID_COORDINATES = 2;
+    GOTO_CANNOT_MOVE = 3;
+}
+
 message GoToResponse {
-    enum GoToResult {
-        SUCCESS = 0;
-        INVALID_COORDINATES = 1;
-        CANNOT_MOVE = 2;
-    }
     Header header = 1;
     GoToResult gotoResult = 2;
 }
