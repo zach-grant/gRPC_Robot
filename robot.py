@@ -65,7 +65,6 @@ class Robot:
 
     def handle_goto(self, request):
         logging.info(f'GoTo request received: header={request.header}, x_coord={request.x_coord}, y_coord={request.y_coord}')
-
         go_to_result = pg.goto_pb2.GOTO_UNDEFINED
         if self.current_mode != pg.telem_pb2.MODE_GUIDED:
                 go_to_result = pg.goto_pb2.GOTO_CANNOT_MOVE
@@ -79,12 +78,14 @@ class Robot:
         return response
 
     def handle_metadata(self):
+        logging.info(f'Metadata request received.')
         metadata = pg.metadata_pb2.Metadata(name=self.name,
                                             firmwareVersion=self.firmware_version,
                                             birthday=self.birthday,
                                             serialID=self.serial_id,
                                             batteryType=self.batteryType,
                                             )
+        logging.info(f'Metadata response created: metadata={metadata}')
         return metadata
 
     def handle_set_mode(self, request):
