@@ -2,9 +2,9 @@
 
 import random
 from google.protobuf.timestamp_pb2 import Timestamp
+from datetime import datetime
 import grpc
 from concurrent.futures import ThreadPoolExecutor
-
 import fix_paths
 import logging
 import protos_gen as pg
@@ -22,7 +22,22 @@ class Robot:
         # used for the timestamp of the messages (part of the header)
         self.timestamp = Timestamp()
 
-        logging.info('A robot created successfully!')
+        # define some identity for the robot
+        robot = self.random.choice([('Arnie',  'T-800',  'GOOD'),
+                                    ('Robert', 'T-1000', 'BAD'),
+                                    ])
+        self.name = robot[0]
+        self.firmware_version = f'{robot[1]}#{self.random_string(6)}'
+        self.birthday = str(datetime.now())
+        self.serial_id = self.random_string(20)
+        self.batteryType = f'{self.random.randint(1,4)}-cell {robot[1]} battery'
+
+        logging.info(f'A {robot[2]} robot created successfully! Name: {self.name}, Model: {robot[1]}')
+
+    def random_string(self, length):
+        # use only capital letters hence the range from 65 to 90
+        result = [chr(self.random.randint(65, 90)) for _ in range(length)]
+        return ''.join(result)
 
     def create_header(self):
         header = pg.header_pb2.Header(uid=str(self.current_message_id).rjust(20, '0'),
@@ -55,6 +70,15 @@ class Robot:
         logging.info(f'GoTo response created: result={response.gotoResult}')
         return response
 
+    def handle_metadata(self):
+        metadata = pg.metadata_pb2.Metadata(name=self.name,
+                                            firmwareVersion=self.firmware_version,
+                                            birthday=self.birthday,
+                                            serialID=self.serial_id,
+                                            batteryType=self.batteryType,
+                                            )
+        return metadata
+
 
 class RobotServicer(Robot,
                     pg.estop_pb2_grpc.StopServiceServicer,
@@ -72,7 +96,7 @@ class RobotServicer(Robot,
         return self.handle_goto(request)
 
     def GetMetadata(self, request, context):
-        return pg.metadata_pb2.Metadata()
+        return self.handle_metadata()
 
     def GetPhoto(self, request, context):
         return pg.photo_pb2.PhotoReply()
