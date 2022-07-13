@@ -9,17 +9,16 @@ import fix_paths
 import logging
 import protos_gen as pg
 import google
+import robot_config as cfg
 
 
 class Robot:
     def __init__(self):
-        # TODO: the robot needs to have a position (x and y) in the 2D space where is lives
-
         # the robot needs its own instance of the random number generator
         self.random = random.Random()
 
         # used to create the UIDs of the messages (part of the header)
-        self.current_message_id = self.random.randint(0, 1_000_000)
+        self.current_message_id = self.random.randint(cfg.message_uid_start_min, cfg.message_uid_start_max)
 
         # used for the timestamp of the messages (part of the header)
         self.timestamp = Timestamp()
@@ -28,16 +27,22 @@ class Robot:
         self.current_mode = pg.telem_pb2.MODE_UNKNOWN
 
         # define some identity for the robot
-        robot = self.random.choice([('Arnie',  'T-800',  'GOOD'),
-                                    ('Robert', 'T-1000', 'BAD'),
-                                    ])
-        self.name = robot[0]
-        self.firmware_version = f'{robot[1]}#{self.__random_string(6)}'
+        robot = self.random.choice(cfg.robot_templates)
+        self.name = robot['name']
+        self.firmware_version = f'{robot["model"]}#{self.__random_string(6)}'
         self.birthday = str(datetime.now())
         self.serial_id = self.__random_string(20)
-        self.batteryType = f'{self.random.randint(1,4)}-cell {robot[1]} battery'
+        self.batteryType = f'{self.random.randint(1,4)}-cell {robot["model"]} battery'
 
-        logging.info(f'A {robot[2]} robot created successfully! Name: {self.name}, Model: {robot[1]}')
+        # define the initial position of the robot in 2D space
+        self.x, self.y = cfg.robot_init_position
+
+        # set initial state of the arms
+        self.left_arm = pg.telem_pb2.ARM_UNKNOWN_STATE
+        self.right_arm = pg.telem_pb2.ARM_UNKNOWN_STATE
+
+        logging.info(f'A new {robot["description"]} robot created successfully! '
+                     f'Name: {self.name}, Model: {robot["model"]}')
 
     def __random_string(self, length):
         # use only capital letters hence the range from 65 to 90
@@ -57,6 +62,7 @@ class Robot:
 
     def handle_estop(self, request):
         logging.info(f'EStop request received: header={request.header}')
+        self.current_mode = pg.telem_pb2.MODE_UNKNOWN  # what estop requested set the robot to unknown state
         # fail the emergency stop randomly 1 out of 5 times
         stop_success = pg.estop_pb2.STOP_SUCCESS if self.fail_once_in_n_times(5) else pg.estop_pb2.STOP_FAIL
         reply = pg.estop_pb2.StopReply(header=self.__create_header(), success=stop_success)
@@ -64,14 +70,18 @@ class Robot:
         return reply
 
     def handle_goto(self, request):
-        logging.info(f'GoTo request received: header={request.header}, x_coord={request.x_coord}, y_coord={request.y_coord}')
+        logging.info(f'GoTo request received: header={request.header}, x_coord={request.x_coord}, '
+                     f'y_coord={request.y_coord}')
         go_to_result = pg.goto_pb2.GOTO_UNDEFINED
         if self.current_mode != pg.telem_pb2.MODE_GUIDED:
-                go_to_result = pg.goto_pb2.GOTO_CANNOT_MOVE
+            go_to_result = pg.goto_pb2.GOTO_CANNOT_MOVE
         elif (request.x_coord < 0) or (request.y_coord < 0):
             go_to_result = pg.goto_pb2.GOTO_INVALID_COORDINATES
         else:
             go_to_result = pg.goto_pb2.GOTO_SUCCESS
+            # TODO: for the moment the robot doesn't move but teleports instantaneously. This needs to be fixed!
+            self.x = request.x_coord
+            self.y = request.y_coord
 
         response = pg.goto_pb2.GoToResponse(header=self.__create_header(), gotoResult=go_to_result)
         logging.info(f'GoTo response created: result={response.gotoResult}')
@@ -87,6 +97,24 @@ class Robot:
                                             )
         logging.info(f'Metadata response created: metadata={metadata}')
         return metadata
+
+    def handle_move(self, request_iterator):
+        if self.current_mode == pg.telem_pb2.MODE_MANUAL:
+            # accept moves from the remote control only in manual mode
+            logging.info('The robot is in MANUAL mode so the RC commands are accepted!')
+
+            for request in request_iterator:
+                # TODO: xAxis and yAxis should be the rates at which the robot moves and currently it just teleports
+                #  to the specified position. The same goes for the arms as well. Their positioning should not be
+                #  instantaneous but should happen slowly in time.
+                self.x = request.xAxis
+                self.y = request.yAxis
+                self.left_arm = request.leftArmCommand
+                self.right_arm = request.rightArmCommand
+                logging.info(f'The state of the robot after the RC command x:{self.x}, y:{self.y},'
+                             f'left arm:{self.left_arm}, right arm:{self.right_arm}')
+
+        return google.protobuf.empty_pb2.Empty()
 
     def handle_set_mode(self, request):
         logging.info(f'SetMode request received: header={request.header}, mode={request.mode}')
@@ -126,7 +154,7 @@ class RobotServicer(Robot,
         return pg.photo_pb2.NewGeoPhotoTakenReply()
 
     def Move(self, request_iterator, context):
-        return google.protobuf.empty_pb2.Empty()
+        return self.handle_move(request_iterator)
 
     def SetMode(self, request, context):
         return self.handle_set_mode(request)
@@ -137,7 +165,7 @@ if __name__ == '__main__':
 
     logging.info(f'Using the following path for importing the proto/gRPC imports: {fix_paths}')
 
-    server = grpc.server(ThreadPoolExecutor(max_workers=5))
+    server = grpc.server(ThreadPoolExecutor(max_workers=cfg.server_max_workers))
     robot_servicer = RobotServicer()
     pg.estop_pb2_grpc.add_StopServiceServicer_to_server(robot_servicer, server)
     pg.goto_pb2_grpc.add_GoToControllerServicer_to_server(robot_servicer, server)
@@ -147,6 +175,6 @@ if __name__ == '__main__':
     pg.remoteControl_pb2_grpc.add_RcServiceServicer_to_server(robot_servicer, server)
     pg.telem_pb2_grpc.add_TelemServiceServicer_to_server(robot_servicer, server)
 
-    server.add_insecure_port('[::]:9000')
+    server.add_insecure_port(f'{cfg.server_url}:{cfg.server_port}')
     server.start()
     server.wait_for_termination()
