@@ -1,18 +1,17 @@
 syntax = "proto3";
 
-import "protos/header.proto";
-import "protos/telem.proto";
-import "google/protobuf/Empty.proto";
+import "header.proto";
+import "telem.proto";
+import "google/protobuf/empty.proto";
 
-message remoteControl {
-    header header = 1;
-
+message RemoteControl {
+    Header header = 1;
     ArmState leftArmCommand = 2;
     ArmState rightArmCommand = 3;
     float xAxis = 4;
     float yAxis = 5;
 }
 
-service rcService {
-    rpc move(stream remoteControl) returns (google.protobuf.Empty) {}
+service RcService {
+    rpc Move(stream RemoteControl) returns (google.protobuf.Empty) {}
 }

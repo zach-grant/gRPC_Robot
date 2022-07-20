@@ -1,21 +1,22 @@
 syntax = "proto3";
 
-import "protos/header.proto";
+import "header.proto";
 
 enum RobotMode {
-    Manual = 0;
-    Guided = 1;
+    MODE_UNKNOWN = 0;
+    MODE_MANUAL = 1; // TODO: Remote Control actions should work only in manual mode
+    MODE_GUIDED = 2; // TODO: Goto actions should work only in guided mode
 }
 
 enum ArmState {
-    UP = 0;
-    DOWN = 1;
-    STOWED = 2;
+    ARM_UNKNOWN_STATE = 0;
+    ARM_UP = 1;
+    ARM_DOWN = 2;
+    ARM_STOWED = 3;
 }
 
-message telem {
-    header header = 1;
-
+message Telem {
+    Header header = 1;
     float x = 2;
     float y = 3;
 
@@ -25,17 +26,16 @@ message telem {
     ArmState rightArmState = 17;
 }
 
-message setModeRequest {
-    header header = 1;
+message SetModeRequest {
+    Header header = 1;
     RobotMode mode = 2;
 }
 
-message setModeResponse {
-    header header = 1;
+message SetModeResponse {
+    Header header = 1;
     bool modeSetSuccess = 2;
 }
 
-service telemService {
-    rpc setMode (setModeRequest) returns (setModeResponse) {}
+service TelemService {
+    rpc SetMode (SetModeRequest) returns (SetModeResponse) {}
 }
-

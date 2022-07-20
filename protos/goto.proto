@@ -1,23 +1,26 @@
 syntax = "proto3";
 
-import "protos/header.proto";
+import "header.proto";
 
 message GoToRequest {
-    header header = 1;
+    Header header = 1;
     int32 x_coord = 2;
     int32 y_coord = 3;
 }
 
+enum GoToResult {
+    // why those ugly names: https://developers.google.com/protocol-buffers/docs/style#enums
+    GOTO_UNDEFINED = 0;
+    GOTO_SUCCESS = 1;
+    GOTO_INVALID_COORDINATES = 2;
+    GOTO_CANNOT_MOVE = 3; // will be returned if the robot is not in guided state
+}
+
 message GoToResponse {
-    enum GoToResult {
-        SUCCESS = 0;
-        INVALID_COORDINATES = 1;
-        CANNOT_MOVE = 2;
-    }
-    header header = 1;
+    Header header = 1;
     GoToResult gotoResult = 2;
 }
 
-service GoTo_Controller {
+service GoToController {
     rpc GoToCoordinates(GoToRequest) returns (GoToResponse) {}
 }

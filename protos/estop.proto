@@ -1,21 +1,22 @@
 syntax = "proto3";
 
-import "protos/header.proto";
+import "header.proto";
 
-message stopRequest {
-    header header = 1;
+message StopRequest {
+    Header header = 1;
 }
 
-message stopReply {
-    enum stopSuccess {
-        SUCCESS = 0;
-        FAIL = 1;
-    }
-    
-    header header = 1;
-    stopSuccess success = 2;       
+enum StopSuccess {
+    // why those ugly names: https://developers.google.com/protocol-buffers/docs/style#enums
+    STOP_SUCCESS = 0;
+    STOP_FAIL = 1;
 }
 
-service stopService {
-    rpc stop(stopRequest) returns (stopReply) {}
+message StopReply {
+    Header header = 1;
+    StopSuccess success = 2;
+}
+
+service StopService {
+    rpc Stop(StopRequest) returns (StopReply) {}
 }

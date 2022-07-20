@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-message header {
+message Header {
     string uid = 1;
     google.protobuf.Timestamp time = 2;
 }
